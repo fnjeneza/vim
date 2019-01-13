@@ -1,0 +1,23 @@
+---
+# Install a developer environment
+# ansible-playbook ansible/docker_ubuntu.yml -e ansible_python_interpreter=/usr/bin/python3 -K --become
+
+- name: "Setup docker environment"
+  hosts: target
+
+  tasks:
+  - name: Create $HOME/.local
+    file:
+      path: $HOME/.local
+      state: directory
+  - name: Copy Dockerfile
+    copy:
+      src: Dockerfile
+      dest: /tmp/Dockerfile
+
+  - name: Compile vim
+    command: docker build . --rm -t toto.vim -f /tmp/Dockerfile
+  - name: Copy vim files
+    command: docker run --rm -v $HOME/.local:/vim toto.vim make install
+  - name: Remove docker image
+    command: docker image rm toto.vim
